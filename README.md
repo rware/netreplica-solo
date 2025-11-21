@@ -45,6 +45,8 @@ NETREPLICA's design centers on a thin-waist abstraction that:
 
 3. **Programmable Interfaces**: Enables researchers to express diverse data-generation intents, represent last-mile networks as abstract topologies, and map specifications onto physical/virtual network infrastructures.
 
+**Note**: This all-in-one implementation fully supports all NETREPLICA features using `tc` (traffic control) for shaping, AQM, latency, and buffer management. Parallel experiment execution is currently in development.
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │         Programmable Data-Generation Interfaces          │
@@ -62,6 +64,19 @@ NETREPLICA's design centers on a thin-waist abstraction that:
 │  (LibreQoS, tc, Mahimahi, Docker, etc.)                  │
 └─────────────────────────────────────────────────────────┘
 ```
+
+> **⚠️ Important: All-in-One Implementation**
+> 
+> This repository provides an **all-in-one** implementation of NETREPLICA that differs from the distributed setup described in the paper. Instead of using three separate physical servers, this implementation uses:
+> - **Namespace `ns1`** (or `downstream`) as the downstream server
+> - **Namespace `ns2`** (or `upstream`) as the upstream server  
+> - **Main namespace** (host) as the middle server/bottleneck
+> 
+> **Current Status:**
+> - ✅ **Fully Supported**: All features and capabilities mentioned in the paper are supported in this all-in-one implementation using `tc` commands (traffic shaping, AQM, base latency, buffer size, CTP replay, etc.)
+> - 🚧 **In Progress**: Parallel experiment execution (elastic scaling)
+> 
+> This single-machine approach enables researchers to run NETREPLICA experiments on a single host without requiring multiple physical servers, while maintaining the same programmable abstractions and capabilities.
 
 ## Cross-Traffic Profiles (CTPs)
 
@@ -102,7 +117,7 @@ cd src
 sudo ./setup.sh
 ```
 
-This creates two network namespaces (`upstream` and `downstream`) connected through virtual interfaces with traffic shaping applied.
+This creates two network namespaces (`upstream`/`ns2` and `downstream`/`ns1`) connected through virtual interfaces with traffic shaping applied. The main namespace acts as the middle server/bottleneck, creating an all-in-one setup on a single machine.
 
 3. Run cleanup when done:
 ```bash
