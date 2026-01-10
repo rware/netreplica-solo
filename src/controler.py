@@ -62,3 +62,30 @@ def run_client(cmd, password):
         text=True,
         check=True,
     )
+
+def capture(outputFileName, duration, flags, ip, vantagePoints, overwrite=False):
+    upstreamIface = 'veth6'
+    downstreamIface = 'veth2'
+    outDir = '/home/jaber/captures/'
+    upFileName = outDir + 'up_' + outputFileName
+    downFileName = outDir + 'down_' + outputFileName
+
+    UpCommand = f"tshark -i {upstreamIface} -a duration:{duration} -w {upFileName} {flags}"
+    if ip not in ("all", None, ""):
+        UpCommand += f' -f "host {ip}"'
+
+    DownCommand = f"tshark -i {downstreamIface} -a duration:{duration} -w {downFileName} {flags}"
+    if ip not in ("all", None, ""):
+        DownCommand += f' -f "host {ip}"'
+
+    if 'upstream' in vantagePoints:
+        if not overwrite and os.path.exists(upFileName):
+            print("\033[91m***** ERROR: Capture file already exists! Use overwrite option to proceed. *****\033[0m")
+            return
+        subprocess.Popen(UpCommand, shell=True)
+
+    if 'downstream' in vantagePoints:
+        if not overwrite and os.path.exists(downFileName):
+            print("\033[91m***** ERROR: Capture file already exists! Use overwrite option to proceed. *****\033[0m")
+            return
+        subprocess.Popen(DownCommand, shell=True)
