@@ -49,22 +49,27 @@ ip netns exec $NS2 sed -i '1s/^/nameserver 8.8.8.8\n /' /etc/resolv.conf
 
 
 ip netns exec $NS1 ip route change default dev veth1
-ip netns exec $NS1 ip route change default veth1 via 172.16.3.1 
+ip netns exec $NS1 ip route change default dev veth1 via 172.16.3.1 
 
 
 ip netns exec $NS2 ip route add 172.16.1.0/30 dev veth3 # made it work
 ip netns exec $NS2 ip route change default via 172.16.3.2 dev veth5
 
-ethtool -L veth2 tx 64 rx 64
-ethtool -L veth4 tx 64 rx 64
+
+
 
 # If not using xdp bridge 
-BR='LibreBr'
+BR='netrepBr'
 ip link add $BR type bridge
 ip link set dev veth2 master $BR
 ip link set dev veth4 master $BR
 ip link set dev $BR up
 
+
+# At this point, the system setup is complete and you can run the experiemetns in example.ipynb to verify everyging is working correctly. 
+
+
+# To use LibreQoS instead of the, delete the Bridge interface if you are using XDP bridge, otherwise, keep the brdige there. 
 
 ################ delete all 
 # Delete namespaces
@@ -72,7 +77,7 @@ sudo ip netns del ns1
 sudo ip netns del ns2
 
 # Delete bridge
-sudo ip link del LibreBr
+sudo ip link del netrepBr
 
 # Delete veth pairs if any remain
 sudo ip link del veth1 2>/dev/null
@@ -85,3 +90,6 @@ sudo ip link del veth6 2>/dev/null
 # Flush iptables NAT rules added
 sudo iptables -t nat -D POSTROUTING -o eno2 -j MASQUERADE 2>/dev/null
 sudo iptables -t nat -D POSTROUTING -o wlp2s0 -j MASQUERADE 2>/dev/null
+
+
+
