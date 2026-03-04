@@ -1,37 +1,97 @@
-# NetReplica Local Namespace Setup
+# Docker for netreplica Solo Version
 
-This setup creates two namespaces, **upstream** and **downstream**, connected through virtual interfaces. Traffic shaping is applied on both interfaces, and the script configures all routing and NAT needed for full connectivity.
+This project builds a privileged Ubuntu 22.04 container that creates two Linux network namespaces connected through a bridge. It is designed for controlled networking experiments using `ip netns`, `veth`, `tc`, and `iptables`.
 
-## Setup
-Run the setup script:
-```
-sudo ./setup.sh
-```
+---`
 
-### What the Script Does
+## Project Structure
 
-* Creates upstream and downstream namespaces
-* Creates veth pairs to link the namespaces
+- `Dockerfile` – Builds the container image  
+- `setup.sh` – Creates namespaces, veth pairs, routing, NAT, and bridge  
+- `cleanup.sh` – Removes namespaces, bridge, veth interfaces, and flushes NAT rules  
 
-* Assigns IP addresses to all interfaces
+---
 
-* Applies shaping rules on both veth interfaces
+## 1. Create Docker Network
 
-* *onfigures routing in each namespace
+The subnet must **not** be `172.16.0.0/16`.
 
-* Enables NAT and forwarding on the host
-
-* Provides end-to-end connectivity for testing traffic*
-
-Cleanup
-```
-sudo ./cleanup.sh
+```bash
+docker network create --subnet 10.10.0.0/16 docBr
 ```
 
-### Requirements
+---
 
-1. Linux system
+## 2. Build Image
 
-2. iproute2, tc, iptables
+```bash
+docker build -t netreplica-solo .
+```
 
-3. Root privileges
+---
+
+## 3. Run Container
+
+```bash
+docker rm -f solo 2>/dev/null
+
+docker run -it \
+  --name solo \
+  --network docBr \
+  --privileged \
+  --cap-add=NET_ADMIN \
+  --cap-add=SYS_ADMIN \
+  --sysctl net.ipv4.ip_forward=1 \
+  netreplica-solo
+```
+
+---
+
+## 4. Setup Networking
+
+Inside the container:
+
+```bash
+/setup.sh
+```
+
+This creates:
+
+- Namespace `ns1` (downstream)  
+- Namespace `ns2` (upstream)  
+- Bridge `netrepBr`  
+- veth pairs between namespaces and root  
+- Routing configuration  
+- NAT rules  
+
+Verify setup:
+
+```bash
+ip netns list
+ip link show
+```
+
+---
+
+## 6. Cleanup
+
+Inside the container:
+
+```bash
+/cleanup.sh
+```
+
+This removes:
+
+- All namespaces  
+- Bridge  
+- veth interfaces  
+- NAT rules  
+
+---
+
+## Requirements
+
+- Docker installed  
+- Container must run with `--privileged`  
+- Uses `iproute2`, `iptables`, and `tc`  
