@@ -23,6 +23,7 @@ sudo docker network create --subnet 192.168.40.0/24 docBr
 ## 2. Build Image
 Move to the `src` directory and run the following command:
 ```bash
+cd src
 sudo docker build -t netreplica-solo .
 ```
 
