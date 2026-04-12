@@ -58,8 +58,11 @@ ip netns exec $NS2 sh -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
 # Routing adjustments  #
 ########################
 
-ip netns exec $NS1 ip route change default dev veth1
-ip netns exec $NS1 ip route change default via 172.16.3.1 dev veth1
+# ns1's gateway is ns2's veth3 (172.16.2.1), which sits on the same L2 segment
+# via the bridge. `onlink` is required because 172.16.2.1 is in a different /30
+# than ns1's own veth1 address. The previous value 172.16.3.1 (ns2's veth5)
+# was on a separate, non-bridged subnet — ARP would never resolve it.
+ip netns exec $NS1 ip route change default via 172.16.2.1 dev veth1 onlink
 
 ip netns exec $NS2 ip route add 172.16.1.0/30 dev veth3
 ip netns exec $NS2 ip route change default via 172.16.3.2 dev veth5
