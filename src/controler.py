@@ -7,7 +7,7 @@ def run_cmd(cmd):
     subprocess.run(cmd, shell=True, check=True)
 
 
-def shaping(download_mbps, upload_mbps, qdisc, r2q=100, lattency = 50, qsize = 0):
+def shaping(download_mbps, upload_mbps, qdisc, lattency = 50, qsize = 0, r2q=100):
     """
     HTB-based shaping with AQM.
     Rates are in Mbps.
