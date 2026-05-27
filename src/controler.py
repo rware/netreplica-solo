@@ -22,10 +22,13 @@ def shaping(download_mbps, upload_mbps, qdisc, lattency = 50, qsize = 0, r2q=100
         f"tc qdisc add dev veth2 root handle 1: htb default 10 r2q {r2q} && "
         f"tc class add dev veth2 parent 1: classid 1:10 htb "
         f"rate {download_mbps}Mbit ceil {download_mbps}Mbit && "
-        f"tc qdisc add dev veth2 parent 1:10 {qdisc} "
-        f"ip link set netrepBr txqueuelen {qsize}"
     )
-
+    run_cmd(
+        f"tc qdisc add dev veth2 parent 1:10 {qdisc} "
+    )
+    run_cmd(
+        "ip link set netrepBr txqueuelen {qsize}"
+    )
     run_cmd(
         f"tc qdisc del dev veth4 root 2>/dev/null || true && "
         f"tc qdisc add dev veth4 root handle 1: htb default 10 r2q {r2q} && "
