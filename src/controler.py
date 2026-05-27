@@ -27,7 +27,7 @@ def shaping(download_mbps, upload_mbps, qdisc, lattency = 50, qsize = 0, r2q=100
         f"tc qdisc add dev veth2 parent 1:10 {qdisc} "
     )
     run_cmd(
-        "ip link set netrepBr txqueuelen {qsize}"
+        f"ip link set netrepBr txqueuelen {qsize} "
     )
     run_cmd(
         f"tc qdisc del dev veth4 root 2>/dev/null || true && "
