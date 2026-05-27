@@ -16,7 +16,7 @@ def shaping(download_mbps, upload_mbps, qdisc, lattency = 50, qsize = 0, r2q=100
       pfifo, bfifo, red, gred, pie, codel, fq_codel, fq, cake
     """
     if qsize == 0:
-        qsize = (4*download_mbps*1e6*lattency*0.001*2)/1500 #quesize is determined by 4*bandwidth*RTT/(size of packet)
+        qsize = int((4*download_mbps*1e6*lattency*0.001*2)/1500 #quesize is determined by 4*bandwidth*RTT/(size of packet))
     run_cmd(
         f"tc qdisc del dev veth2 root 2>/dev/null || true && "
         f"tc qdisc add dev veth2 root handle 1: htb default 10 r2q {r2q} && "
