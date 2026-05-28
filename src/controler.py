@@ -57,7 +57,7 @@ def capture(
     flags="",
     ip=None,
     vantagePoints=("upstream", "downstream"),
-    overwrite=False,
+    overwrite=True,
 ):
     """
     Capture traffic inside the Docker container.
