@@ -37,13 +37,13 @@ def shaping(download_mbps, upload_mbps, qdisc, lattency = 50, qsize = 0, r2q=100
         f"tc qdisc add dev veth4 parent 1:10 {qdisc}"
     )
 
-def latency(latency_ms):
+def latency(latency_ms, targetVeth = "veth3"):
     if latency_ms == 0:
-        run_cmd("tc qdisc del dev veth6 root 2>/dev/null || true")
+        run_cmd(f"tc qdisc del dev {targetVeth} root 2>/dev/null || true")
     else:
         run_cmd(
-            f"tc qdisc del dev veth6 root 2>/dev/null || true && "
-            f"tc qdisc add dev veth6 root netem delay {latency_ms}ms"
+            f"tc qdisc del dev {targetVeth} root 2>/dev/null || true && "
+            f"tc qdisc add dev {targetVeth} root netem delay {latency_ms}ms"
         )
 
 
