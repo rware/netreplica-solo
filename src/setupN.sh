@@ -27,12 +27,12 @@ do
     ip netns add ${!nameSpace}
 
     ip link add $veth1 type veth peer name $veth2
-    ip addr add 172.16.1.$((j*2))/30 dev $veth2
+    ip addr add 172.16.1.$((j*2))/24 dev $veth2
     ip link set $veth2 up
 
 
     ip link set $veth1 netns  ${!nameSpace}
-    ip netns exec ${!nameSpace} ip addr add 172.16.1.$((j*2-1))/30 dev $veth1
+    ip netns exec ${!nameSpace} ip addr add 172.16.1.$((j*2-1))/24 dev $veth1
     ip netns exec ${!nameSpace} ip link set $veth1 up
     ip netns exec ${!nameSpace} ip route add default via 172.16.1.$((j*2-1))
 
@@ -53,8 +53,8 @@ ip link add vethBC type veth peer name vethBottleneck
 ip link add vethIP type veth peer name vethInternet
 
 
-ip addr add 172.16.2.2/30 dev vethBottleneck
-ip addr add 172.16.3.2/30 dev vethInternet
+ip addr add 172.16.2.2/24 dev vethBottleneck
+ip addr add 172.16.3.2/24 dev vethInternet
 ip link set vethBottleneck up
 ip link set vethInternet up
 
@@ -63,8 +63,8 @@ ip link set vethBC netns $NS0
 ip link set vethIP netns $NS0
 
 
-ip netns exec $NS0 ip addr add 172.16.2.1/30 dev vethBC
-ip netns exec $NS0 ip addr add 172.16.3.1/30 dev vethIP
+ip netns exec $NS0 ip addr add 172.16.2.1/24 dev vethBC
+ip netns exec $NS0 ip addr add 172.16.3.1/24 dev vethIP
 ip netns exec $NS0 ip link set vethBC up
 ip netns exec $NS0 ip link set vethIP up
 ip netns exec $NS0 ip route add default via 172.16.3.2
@@ -80,7 +80,7 @@ echo Finished creating ns0
 #This is the reasoning for the adjustments when their are only two namespaces and a bridge
 
 # ns1's gateway is ns0's vethBC (172.16.2.1), which sits on the same L2 segment
-# via the bridge. `onlink` is required because 172.16.2.1 is in a different /30
+# via the bridge. `onlink` is required because 172.16.2.1 is in a different /24
 # than ns1's own veth1 address. The previous value 172.16.3.1 (ns2's vethIP)
 # was on a separate, non-bridged subnet — ARP would never resolve it.
 
@@ -92,7 +92,7 @@ do
 done
 
 #Performing nessacary routing adjustments for ns0
-ip netns exec $NS0 ip route add 172.16.1.0/30 dev vethBC
+ip netns exec $NS0 ip route add 172.16.1.0/24 dev vethBC
 ip netns exec $NS0 ip route change default via 172.16.3.2 dev vethIP
 echo All routing adjustments performed succusfully
 #All nessacary routing adjustments are complete
