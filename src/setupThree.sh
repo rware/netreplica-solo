@@ -4,6 +4,7 @@ set -e
 NS1="ns1"
 NS2="ns2"
 NS3="ns3"
+NS4="ns4"
 NUM_QUEUE=4
 BR="netrepBr"
 
@@ -42,8 +43,26 @@ ip link set veth7 netns $NS3
 ip netns exec $NS3 ip addr add 172.16.1.3/30 dev veth7
 ip netns exec $NS3 ip link set veth7 up
 ip netns exec $NS3 ip route add default via 172.16.1.3
+ip netns exec $NS3 sh -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
 echo finshied seting up NS3
 #End NS3 Setup
+
+#Set up NS4
+ip netns add $NS4
+
+ip link add veth9 type veth peer name veth10
+ip addr add 172.16.1.6/30 dev veth10
+ip link set veth10 up
+
+
+ip link set veth9 netns $NS4
+ip netns exec $NS4 ip addr add 172.16.1.5/30 dev veth9
+ip netns exec $NS4 ip link set veth9 up
+ip netns exec $NS4 ip route add default via 172.16.1.6
+ip netns exec $NS4 sh -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
+echo finshied seting up NS3
+#End NS4 Setup
+
 
 
 
@@ -86,9 +105,13 @@ ip netns exec $NS1 ip route change default via 172.16.2.1 dev veth1 onlink
 
 ip netns exec $NS3 ip route change default via 172.16.2.1 dev veth7 onlink
 
+ip netns exec $NS4 ip route change default via 172.16.2.1 dev veth9 onlink
+
+
 ip netns exec $NS2 ip route add 172.16.1.0/30 dev veth3
 
 ip netns exec $NS2 ip route change default via 172.16.3.2 dev veth5
+
 
 ################
 # Bridge setup #
@@ -98,9 +121,9 @@ ip link add $BR type bridge
 ip link set dev veth2 master $BR
 ip link set dev veth4 master $BR
 ip link set dev veth8 master $BR
+ip link set dev veth10 master $BR
 ip link set dev $BR up
 
-#TODO add NS3's veth and make sure it works
 
 echo
 echo "======================================"
